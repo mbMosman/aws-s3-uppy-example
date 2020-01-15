@@ -1,68 +1,59 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+# Upload to AWS S3 from React
 
-## Available Scripts
+This is a simple React project to spike out doing a secure AWS image upload and access.
 
-In the project directory, you can run:
+## Things I'm exploring w/ this code
 
-### `npm start`
+- Configuring security on an AWS bucket w/ an IAM user
+- Uploading to AWS directly from the brower w/ pre-signed URLs
+- Displaying images uploaded to the AWS bucket. 
 
-Runs the app in the development mode.<br>
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 
-The page will reload if you make edits.<br>
-You will also see any lint errors in the console.
+## AWS Setup
 
-### `npm test`
+To work through this, you need an AWS account, fortunately they'll let you play around with stuff for free to learn. (Super smart on their part.)
 
-Launches the test runner in the interactive watch mode.<br>
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+To get things setup, I used this resource from Amazon: https://docs.aws.amazon.com/AmazonS3/latest/dev/example-walkthroughs-managing-access-example1.html
 
-### `npm run build`
+I'll include notes below on some of the steps from my own walkthrough:
 
-Builds the app for production to the `build` folder.<br>
-It correctly bundles React in production mode and optimizes the build for the best performance.
+- When creating the AccountAdmin, it says to give it administrator or full access. To do this, on the 2nd screen of the "Add User" process where you "Set Permissions", I used the button to "Attach existing policies directly", then selected the AdministratorAccess policy from the list displayed. I repeated this for the "Set permission boundary". __Make sure to record all the information, including the access URL, for the new user. The secret key isn't available again.__
 
-The build is minified and the filenames include the hashes.<br>
-Your app is ready to be deployed!
+- AWS CLI - the amazon docs tell you to do this w/ pip if you're on a Mac. I just used Homebrew: `brew install awscli`
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+- When configuring the CLI, make sure to setup a specific profile for each user. The walkthrough has you do this for AccountAdmin, but it is really the next account *user* account that is really needed, so it's fine to skip the profile for the admin.
 
-### `npm run eject`
+- While setting up your bucket, note the region you select. You can get the region needed in the code using this table: https://docs.aws.amazon.com/general/latest/gr/rande.html#s3_region
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+- For the 2nd *user* account, I gave that account "programmatic access" only, no access to the management console. When you "Set Permissions", use the button to "Attach existing policies directly", then click "Create Policy". Switch to JSON view and paste in the example. __You will need to update the bucket ARN.__  I got the bucket ARN by opening another window & going to the bucket in S3, then clicked on the "Permissions" tab and "Bucket Policy". The ARN was shown there. (You'll also need this open to update the bucket policy, where you need the new user ARN.) __Once the policy is created, don't forget to attach it to the user!__ I set no permission boundary for this user.
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+- Once the user is created, you can update the bucket policy using the example from the article. __You must update both the bucket ARN & the user ARN in two places.__
 
-Instead, it will copy all the configuration files and the transitive dependencies (Webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+- To get things working through this app vs the CLI, I also needed to setup a CORS configuration on the bucket. 
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+The example below would work for something deployed, but while testing locally I set the AllowedOrigin to `*` to allow access from any origin.
+```
+<CORSConfiguration>
+ <CORSRule>
+   <AllowedOrigin>http://www.example1.com</AllowedOrigin>
+   
+   <AllowedMethod>GET</AllowedMethod>
+   <AllowedMethod>PUT</AllowedMethod>
+   <AllowedMethod>POST</AllowedMethod>
+   <AllowedMethod>DELETE</AllowedMethod>
 
-## Learn More
+   <AllowedHeader>*</AllowedHeader>
+ </CORSRule>
+</CORSConfiguration>
+```
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+- At this point I was able to setup a profile for the user on the CLI and upload a test image through the CLI. 
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+## Image Upload from App
 
-### Code Splitting
+So, instead of trying to build something myself to allow the user to select a file to upload, I did a quick web search for an existing React Component. I was hoping for one that would allow drag-and-drop, as well as browsing to select a file. The first thing I came across was [`react-dropzone`](https://react-dropzone.js.org/), so I gave it a go and realized I was going to be doing a lot of work to make it look good and work the way I wanted.
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/code-splitting
+Instead I decided to try out [uppy](https://uppy.io). They have some nice documentation & examples too: 
+ - https://uppy.io/docs/aws-s3/
+ - https://uppy.io/docs/aws-s3/#example-presigned-url
 
-### Analyzing the Bundle Size
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size
-
-### Making a Progressive Web App
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app
-
-### Advanced Configuration
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/advanced-configuration
-
-### Deployment
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/deployment
-
-### `npm run build` fails to minify
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify
