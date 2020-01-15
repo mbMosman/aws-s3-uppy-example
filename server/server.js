@@ -1,8 +1,6 @@
 const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
-const PORT = process.env.PORT || 5000;
-const axios = require('axios');
 const AWS = require('aws-sdk');
 
 // This is for our env config, to get our api key from the .env
@@ -50,6 +48,7 @@ app.get('/api/signurl/get/:filename', (req, res) => {
 })
 
 /** ---------- START SERVER ---------- **/
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
     console.log('Listening on port: ', PORT);
 });
