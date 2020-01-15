@@ -51,8 +51,22 @@ The example below would work for something deployed, but while testing locally I
 
 ## Image Upload from App
 
-So, instead of trying to build something myself to allow the user to select a file to upload, I did a quick web search for an existing React Component. I was hoping for one that would allow drag-and-drop, as well as browsing to select a file. The first thing I came across was [`react-dropzone`](https://react-dropzone.js.org/), so I gave it a go and realized I was going to be doing a lot of work to make it look good and work the way I wanted.
+Instead of trying to build something myself to allow the user to select a file to upload, I did a quick web search for an existing React Component. I was hoping to find one that would allow drag-and-drop, as well as browsing to select a file. The first thing I came across was [`react-dropzone`](https://react-dropzone.js.org/), so I gave it a go and realized I was going to be doing a lot of work to make it look good and work the way I wanted.
 
-Instead I decided to try out [uppy](https://uppy.io). They have some nice documentation & examples too: 
+So I continued looking and discovered [uppy](https://uppy.io). Their upload component is pretty flexible and they have some nice documentation & examples for using AWS S3 too: 
  - https://uppy.io/docs/aws-s3/
  - https://uppy.io/docs/aws-s3/#example-presigned-url
+
+I'm using their component to upload directly to the S3 bucket, so no storage space is needed within my app.
+
+I'm also using pre-signed urls so that I can keep my S3 credentials private on my server in an .env file & not need to provide those to my client code.
+
+## Signed URL's
+The server uses the [AWS JavaScript SDK](https://docs.aws.amazon.com/sdk-for-javascript/index.html) to get signed urls for the client code to use. 
+
+- getSignedUrl (to get signed urls for both upload & view)
+- listObjectsV2 (to get all the things to display)
+
+The AWS docs and code aren't the easiest thing to sort through if you don't know what you want. However I did find the code snippets in this blog helpful: [Securing AWS S3 Uploads Using Presigned URLs](https://medium.com/@aidan.hallett/securing-aws-s3-uploads-using-presigned-urls-aa821c13ae8d). This post also walks through some of the security setup, but since I had already sorted through that I skipped down to the code. 
+
+
