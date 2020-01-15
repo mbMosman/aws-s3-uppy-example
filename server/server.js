@@ -27,6 +27,7 @@ app.use(express.static('build'));
 
 /** ---------- EXPRESS ROUTES ---------- **/
 
+// GET - signed url for upload
 app.get('/api/signurl/put/:filename', (req, res) => {
   const presignedPutUrl = s3.getSignedUrl('putObject', {
       Bucket: process.env.BUCKET_NAME,
@@ -37,14 +38,36 @@ app.get('/api/signurl/put/:filename', (req, res) => {
   res.send({url: presignedPutUrl})
 })
 
+// GET - signed URL to view
 app.get('/api/signurl/get/:filename', (req, res) => {
   const presignedGetUrl = s3.getSignedUrl('getObject', {
-      Bucket: 'presignedurldemo',
-      Key: 'image.jpg', //filename
+      Bucket: process.env.BUCKET_NAME,
+      Key: req.params.filename, 
       Expires: 100 //time to expire in seconds - 5 min
   });
   console.log('sending presigned url', presignedGetUrl);
   res.send({url: presignedGetUrl})
+})
+
+// GET signed urls for all images in the s3 bucket
+app.get('/api/image', (req, res) => {
+  const params = {
+    Bucket: process.env.BUCKET_NAME 
+  };
+  s3.listObjectsV2(params, (err, data) => {
+    console.log('S3 List', data);
+    // Package signed URLs for each to send back to client
+    let images = []
+    for (let item of data.Contents) {
+      let url = s3.getSignedUrl('getObject', {
+          Bucket: process.env.BUCKET_NAME,
+          Key: item.Key, 
+          Expires: 100 //time to expire in seconds - 5 min
+      });
+      images.push(url);
+    }
+    res.send(images);
+  })
 })
 
 /** ---------- START SERVER ---------- **/

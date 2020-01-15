@@ -68,7 +68,7 @@ class UploadModalButton extends Component {
   render () {
     return (
       <div>
-        <button onClick={this.handleOpen}>Upload some images</button>
+        <button onClick={this.handleOpen}>Select Image</button>
         <DashboardModal
           uppy={this.uppy}
           closeModalOnClickOutside

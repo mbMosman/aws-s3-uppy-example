@@ -56,4 +56,3 @@ So, instead of trying to build something myself to allow the user to select a fi
 Instead I decided to try out [uppy](https://uppy.io). They have some nice documentation & examples too: 
  - https://uppy.io/docs/aws-s3/
  - https://uppy.io/docs/aws-s3/#example-presigned-url
-
